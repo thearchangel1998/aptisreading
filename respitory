@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>APTIS Reading Master Suite (Full 10 Tests)</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e67e22;
+            --success: #27ae60;
+            --danger: #c0392b;
+            --bg-body: #f4f7f6;
+            --bg-card: #ffffff;
+            --text-main: #333333;
+            --text-muted: #7f8c8d;
+            --border-color: #eeeeee;
+            --reading-bg: #f8f9fa;
+            --highlight-yellow: #fff3cd;
+            --shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        /* Dark Mode Variables */
+        body.dark-mode {
+            --primary: #1a252f;
+            --secondary: #2980b9;
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --text-main: #ecf0f1;
+            --text-muted: #bdc3c7;
+            --border-color: #333;
+            --reading-bg: #2c3e50;
+            --highlight-yellow: #4a4a2d;
+            --shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* --- WELCOME OVERLAY --- */
+        #welcome-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s;
+            padding: 20px;
+        }
+        
+        .welcome-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            color: #333;
+            position: relative;
+        }
+
+        .welcome-card h1 { color: var(--primary); margin-bottom: 10px; border: none; font-size: 1.8rem; }
+        .welcome-card p { color: #666; margin-bottom: 25px; line-height: 1.5; }
+        
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
+        .form-control {
+            width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 8px;
+            font-size: 1rem; transition: border 0.3s;
+        }
+        .form-control:focus { border-color: var(--secondary); outline: none; }
+
+        .btn-start {
+            background-color: var(--secondary); color: white; border: none;
+            padding: 15px 30px; font-size: 1.1rem; border-radius: 50px;
+            cursor: pointer; width: 100%; font-weight: bold; transition: 0.3s;
+            margin-top: 10px;
+            box-shadow: 0 4px 6px rgba(52, 152, 219, 0.3);
+        }
+        .btn-start:hover { background-color: #2980b9; transform: translateY(-2px); }
+
+        .storage-notice {
+            font-size: 0.85rem;
+            color: #c0392b;
+            background-color: #f9e79f;
+            margin-top: 25px;
+            border: 1px solid #f39c12;
+            padding: 15px;
+            border-radius: 8px;
+            line-height: 1.4;
+            text-align: left;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 280px;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding-top: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            flex-shrink: 0;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar h2 { font-size: 1.2rem; margin: 0; padding: 15px 0; letter-spacing: 1px; }
+
+        .theme-toggle {
+            background: none; border: 1px solid rgba(255,255,255,0.3);
+            color: white; cursor: pointer; font-size: 1.2rem;
+            padding: 5px 10px; border-radius: 5px; transition: 0.2s;
+        }
+        .theme-toggle:hover { background: rgba(255,255,255,0.1); }
+
+        .nav-btn {
+            background: none; border: none; color: #bdc3c7;
+            padding: 15px 20px; text-align: left; cursor: pointer;
+            font-size: 0.95rem; transition: all 0.2s;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05); width: 100%;
+        }
+
+        .nav-btn:hover { background-color: rgba(255,255,255,0.08); color: white; }
+        .nav-btn.active-dashboard {
+            background-color: var(--secondary); color: white;
+            font-weight: bold; border-left: 5px solid var(--accent);
+        }
+
+        .dropdown-toggle { background-color: rgba(0,0,0,0.15); color: #ecf0f1; font-weight: 600; }
+        .dropdown-content { display: block; background-color: rgba(0,0,0,0.1); }
+        .dropdown-content.hidden { display: none; }
+        
+        .nav-btn.sub-item { padding-left: 35px; font-size: 0.9rem; border-left: 3px solid transparent; }
+        .nav-btn.sub-item.active {
+            background-color: rgba(52, 152, 219, 0.2); color: #fff;
+            font-weight: bold; border-left: 3px solid var(--accent);
+        }
+
+        .nav-score-badge {
+            font-size: 0.75em; padding: 2px 6px; border-radius: 4px;
+            font-weight: bold; min-width: 25px; text-align: center; display: none;
+        }
+        .nav-btn.completed .nav-score-badge { display: inline-block; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            flex: 1; overflow-y: auto; padding: 30px;
+            scroll-behavior: smooth; position: relative;
+        }
+
+        .container {
+            max-width: 900px; margin: 0 auto 50px; background: var(--bg-card);
+            padding: 40px; border-radius: 8px; box-shadow: var(--shadow); display: none;
+        }
+        .container.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        h1 { color: var(--secondary); margin-top: 0; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; font-size: 1.8rem; word-wrap: break-word; }
+        h3 { color: var(--text-main); margin-top: 40px; border-left: 5px solid var(--accent); padding-left: 15px; background: var(--reading-bg); padding: 10px 15px; border-radius: 0 5px 5px 0; font-size: 1.2rem; }
+        
+        /* Section Toggle Header */
+        .section-toggle {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 30px; border-left: 5px solid var(--accent);
+            background: var(--reading-bg); padding: 15px; border-radius: 0 5px 5px 0;
+            cursor: pointer; transition: background 0.2s; color: var(--text-main);
+            user-select: none;
+        }
+        .section-toggle h3 { margin: 0; background: none; border: none; padding: 0; }
+        .section-toggle:hover { background-color: rgba(0,0,0,0.05); }
+        .toggle-icon { font-size: 0.8rem; transition: transform 0.3s; }
+        .collapsed .toggle-icon { transform: rotate(-90deg); }
+        
+        select {
+            padding: 8px 10px; border: 1px solid #bdc3c7; border-radius: 4px;
+            background: var(--bg-card); color: var(--text-main);
+            cursor: pointer; font-size: 1rem; max-width: 100%;
+        }
+
+        .reading-text, .gap-text {
+            background: var(--reading-bg); padding: 25px; border-radius: 8px;
+            margin-bottom: 25px; font-size: 1.05rem; line-height: 1.8;
+            border: 1px solid var(--border-color); color: var(--text-main);
+            overflow-wrap: break-word;
+        }
+        
+        .order-item, .paragraph-box {
+            background: var(--bg-card); padding: 15px; margin-bottom: 12px;
+            border-radius: 6px; border: 1px solid var(--border-color); color: var(--text-main);
+        }
+
+        .question-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px; border-bottom: 1px solid var(--border-color);
+        }
+        .question-row:hover { background-color: rgba(0,0,0,0.02); }
+        .radio-options label { margin-left: 15px; cursor: pointer; padding: 5px; display: inline-block; }
+
+        /* Highlighter */
+        #highlighter-toolbar {
+            position: absolute; background: #333; padding: 8px; border-radius: 30px;
+            display: none; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        #highlighter-toolbar button {
+            width: 30px; height: 30px; border: none; border-radius: 50%;
+            margin: 0 4px; cursor: pointer; transition: transform 0.1s;
+        }
+        #highlighter-toolbar button:hover { transform: scale(1.2); }
+        .hl-yellow { background-color: #ffeb3b; }
+        .hl-green { background-color: #a5d6a7; }
+        .hl-pink { background-color: #f48fb1; }
+        .hl-blue { background-color: #90caf9; }
+        .hl-clear { background-color: #fff; border: 1px solid #ccc !important; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; color: #333; }
+
+        .h-yellow { background-color: #ffeb3b; color: #000; }
+        .h-green { background-color: #a5d6a7; color: #000; }
+        .h-pink { background-color: #f48fb1; color: #000; }
+        .h-blue { background-color: #90caf9; color: #000; }
+        
+        body.dark-mode .h-yellow { background-color: #bba50e; color: #fff; }
+        body.dark-mode .h-green { background-color: #2e7d32; color: #fff; }
+        body.dark-mode .h-pink { background-color: #ad1457; color: #fff; }
+        body.dark-mode .h-blue { background-color: #1565c0; color: #fff; }
+
+        /* Results */
+        .correct { border: 2px solid var(--success) !important; background-color: rgba(39, 174, 96, 0.1) !important; }
+        .incorrect { border: 2px solid var(--danger) !important; background-color: rgba(192, 57, 43, 0.1) !important; }
+        .result-box {
+            background: var(--bg-card); border-top: 5px solid var(--secondary);
+            padding: 30px; border-radius: 8px; margin-top: 40px; text-align: center;
+            display: none; box-shadow: var(--shadow); color: var(--text-main);
+        }
+
+        /* Dashboard */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: var(--bg-card); padding: 20px; border-radius: 10px; box-shadow: var(--shadow); text-align: center; border: 1px solid var(--border-color); position: relative; overflow: hidden; }
+        .stat-val { font-size: 2.5rem; font-weight: 800; color: var(--secondary); }
+        .stat-label { color: var(--text-muted); font-size: 0.9rem; }
+        
+        .score-details-container { transition: all 0.3s ease; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .score-details-container.hidden { display: none; }
+        
+        .score-table { width: 100%; border-collapse: collapse; background: var(--bg-card); border-radius: 8px; min-width: 500px; }
+        .score-table th, .score-table td { padding: 15px 15px; text-align: left; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
+        .score-table th { background-color: var(--primary); color: white; }
+
+        /* Personalized Feedback Card */
+        .feedback-card {
+            grid-column: 1 / -1;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(to right, var(--bg-card), rgba(52, 152, 219, 0.1));
+            border-left: 5px solid var(--text-muted);
+        }
+        .feedback-icon { font-size: 3rem; margin-right: 20px; flex-shrink: 0; }
+        .feedback-content h3 { margin-top: 0; color: var(--secondary); font-size: 1.3rem; }
+        .feedback-content p { margin-bottom: 0; color: var(--text-main); line-height: 1.5; }
+        .feedback-success { border-left-color: var(--success); }
+        .feedback-success .feedback-icon { animation: bounce 1s infinite alternate; }
+        .feedback-warning { border-left-color: var(--accent); }
+
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-5px); } }
+
+        .btn {
+            background-color: var(--secondary); color: white; border: none;
+            padding: 15px 30px; font-size: 1.1rem; border-radius: 50px;
+            cursor: pointer; transition: 0.3s; font-weight: bold; margin: 10px 5px;
+            width: 100%; max-width: 300px; display: inline-block;
+        }
+        .btn:hover { background-color: #2980b9; transform: translateY(-2px); }
+        
+        .badge-C { background: #9b59b6; color: white; }
+        .badge-B2 { background: #2ecc71; color: white; }
+        .badge-B1 { background: #f1c40f; color: white; }
+        .badge-A2 { background: #e67e22; color: white; }
+        .badge-A1 { background: #e74c3c; color: white; }
+        .badge-A0 { background: #95a5a6; color: white; }
+
+        /* --- MOBILE RESPONSIVE CSS --- */
+        @media (max-width: 768px) {
+            body { flex-direction: column; height: auto; overflow: auto; }
+            .sidebar { width: 100%; height: auto; overflow: visible; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: relative; flex-shrink: 0; }
+            .main-content { padding: 15px; overflow: visible; }
+            .container { padding: 20px; margin-bottom: 30px; border-radius: 12px; }
+            h1 { font-size: 1.6rem; }
+            .question-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .radio-options { width: 100%; display: flex; justify-content: space-between; flex-wrap: wrap; }
+            .radio-options label { margin-left: 0; margin-right: 15px; padding: 8px 0; }
+            .feedback-card { flex-direction: column; text-align: center; }
+            .feedback-icon { margin-right: 0; margin-bottom: 10px; }
+            .stat-val { font-size: 2rem; }
+            .score-details-container { overflow-x: auto; }
+            .nav-btn { padding: 18px 20px; }
+            .dropdown-toggle { background-color: rgba(0,0,0,0.2); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Welcome Overlay -->
+    <div id="welcome-overlay">
+        <div class="welcome-card">
+            <h1>🚀 Chào mừng!</h1>
+            <p>Hãy thiết lập hồ sơ để APTIS Master theo dõi tiến độ và đưa ra lời khuyên chính xác cho bạn.</p>
+            <div class="form-group">
+                <label for="user-name">Họ và Tên:</label>
+                <input type="text" id="user-name" class="form-control" placeholder="Nhập tên của bạn...">
+            </div>
+            <div class="form-group">
+                <label for="target-level">Mục tiêu đầu ra (CEFR):</label>
+                <select id="target-level" class="form-control">
+                    <option value="A1">A1</option>
+                    <option value="A2">A2</option>
+                    <option value="B1">B1</option>
+                    <option value="B2" selected>B2</option>
+                    <option value="C">C</option>
+                </select>
+            </div>
+            <button class="btn-start" onclick="startApp()">BẮT ĐẦU LUYỆN TẬP</button>
+            <div class="storage-notice">⚠️ <strong>Lưu ý quan trọng:</strong> Dữ liệu tiến độ của bạn được lưu trữ cục bộ (Local Storage) trên trình duyệt này. Vui lòng hạn chế đóng tab hoặc xóa lịch sử duyệt web để tránh mất kết quả học tập.</div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>APTIS PRO</h2>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Chuyển chế độ Sáng/Tối">🌗</button>
+        </div>
+        <button class="nav-btn active-dashboard" id="btn-dashboard" onclick="switchTab('dashboard')">📊 Dashboard (Tổng quan)</button>
+        <div id="test-nav-container"></div>
+    </div>
+
+    <div class="main-content" id="main-content">
+        <!-- Highlighter Toolbar -->
+        <div id="highlighter-toolbar">
+            <button class="hl-yellow" onmousedown="applyHighlight('h-yellow')"></button>
+            <button class="hl-green" onmousedown="applyHighlight('h-green')"></button>
+            <button class="hl-pink" onmousedown="applyHighlight('h-pink')"></button>
+            <button class="hl-blue" onmousedown="applyHighlight('h-blue')"></button>
+            <button class="hl-clear" onmousedown="applyHighlight('remove')" title="Xóa tô màu">✕</button>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="container active">
+            <h1>Bảng tổng quan & Đánh giá Năng lực</h1>
+            <div class="dashboard-grid">
+                <div id="personal-feedback" class="stat-card feedback-card" style="display:none;">
+                    <div class="feedback-icon" id="fb-icon">🎓</div>
+                    <div class="feedback-content">
+                        <h3 id="fb-title">Xin chào!</h3>
+                        <p id="fb-msg">Hãy hoàn thành bài kiểm tra đầu tiên để nhận đánh giá.</p>
+                    </div>
+                </div>
+                <div class="stat-card"><div class="stat-val" id="avg-scaled">0</div><div class="stat-label">Điểm Scaled Trung Bình (/50)</div></div>
+                <div class="stat-card"><div class="stat-val" id="avg-cefr">-</div><div class="stat-label">Trình độ CEFR Hiện Tại</div></div>
+                <div class="stat-card"><div class="stat-val" id="tests-completed">0/10</div><div class="stat-label">Bài Test Đã Hoàn Thành</div></div>
+            </div>
+            <div class="section-toggle" onclick="toggleScoreDetails(this)"><h3>Chi tiết kết quả từng bài test</h3><span class="toggle-icon">▼</span></div>
+            <div id="score-details-wrapper" class="score-details-container">
+                <table class="score-table">
+                    <thead><tr><th>Bài Test</th><th>Điểm Thô</th><th>Điểm Scaled</th><th>CEFR</th><th>Trạng thái</th></tr></thead>
+                    <tbody id="score-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Test Wrapper -->
+        <div id="test-container-wrapper"></div>
+    </div>
+
+<script>
+    /* --- DỮ LIỆU FULL 10 TESTS (KHÔNG CẮT XÉN) --- */
+    const testsData = [
+        {
+            id: 1, title: "Test 1: Charles Dickens",
+            part1: { text: "I saw some shows in the {1} of one store. I didn't {2} it. I buy some food at the {3}. I ate {4}. I {5} a program on TV.", options: [["market", "window", "shoe"], ["eat", "drink", "buy"], ["classroom", "park", "market"], ["watch", "door", "cake"], ["ate", "saw", "watched"]], answers: ["window", "buy", "market", "cake", "watched"] },
+            part2: { topic1: { title: "Tom Harper", sentences: ["He soon wrote regularly for the magazine, but he was not satisfied.", "He almost left the magazine, but then he decided to create some unusual new characters.", "When he was young, he began writing short stories for a magazine.", "This popularity made Tom Harper rich and successful.", "The characters he imagined were one of the most famous in the world."], order: [2, 3, 1, 5, 4] }, topic2: { title: "Albert Einstein", sentences: ["Princeton University in the USA offered him a job because he was so famous.", "As a child, he moved to a special school because he was so clever.", "She later became his wife and helped him with his earliest scientific discoveries.", "His best friend in his new class was a girl named Lavime.", "These were so advanced that he soon became famous all over the world."], order: [5, 1, 3, 2, 4] } },
+            part3: { people: ["A", "B", "C", "D"], texts: { A: "I have a dream that I work as a tour guide. So I understand that I will have to fly to other countries. In my personal opinion, airplanes are currently too cheap compared to the damage they cause to the environment, so I believe we should add taxes to airline ticket prices to make people choose to use other means of transport before they think about flying. I believe that people are also very happy when they can contribute to protecting the environment.", B: "My family and siblings live quite far from me. So I often have to fly to visit them every month when I have time. We really appreciate the time we spend together and we are happy to be able to meet each other and share our new story. I know that traveling by plane too much is not good for the environment so I often shop online or go to work by bike instead of going by car or I reuse plastic bags and paper bags. In addition, I sometimes volunteer to clean up trash in the neighborhood.", C: "I was a businessman so I had to fly many times a week. I had to go to other countries to be able to sign wine trading contracts with them. I felt very tired every time I have to fly. Now, my sister and I, whenever we have free time, take the train together and we enjoy that time very much because I can travel while sightseeing and relax without any stress.", D: "If I have to go somewhere I will choose other means of public transport, not the plane. Every time I go on a plane I feel extremely tired and I just hope time passes quickly so I can get off that plane. However, due to the specific nature of my job, I have to film in many different locations, so sometimes I cannot avoid having to take this public transportation." }, questions: ["Who wants to work in other countries?", "Who tries to protect the environment?", "Who needs to fly for their work?", "Who visits relatives regularly?", "Who suggests making flights more expensive?", "Who likes relaxing while they travel?", "Who finds flying tiring?"], answers: ["A", "B", "D", "B", "A", "C", "D"] },
+            part4: { paragraphs: ["The popularity of Dickens's works in our time remains a global phenomenon. Although he wrote his novels in the 19th century, his works have had a global impact. In addition, these masterpieces helped connect Renaissance drama to the multimedia revolution. Many readers find the characters and themes surprisingly modern.", "Shakespeare's plays are difficult to understand and sometimes require the reader to struggle or think twice to figure out the character's thoughts. Sometimes the dialogue tends to be emotional without any connection to the context of the story. There are many passages that are a confusing mess of single words and old classical vocabulary.", "Hamlet is a Renaissance tragedy written by Shakespeare. The play is very long and has plot twists that keep the reader guessing. Dickens had a special interest in the work. He told his daughter to keep an eye on Hamlet. For Dickens' novels, he sometimes created serial editions, with new chapters released monthly, keeping readers eagerly awaiting the next issue.", "Dickens’ legacy is undeniable. His works have been translated and used in over 100 countries and are studied by most schoolchildren in the world. It has even been said that Dickens’ legacy belongs not to one era but to all times. It is easy to see that Dickens lives on in society and culture through his language and through his enduring influence on education and the media.", "Dickens achieved success at a young age. His first novel, The Pickwick Papers, was published when he was only 24 and became a bestseller. His success increased throughout the 1590s. He was honored as a member of the Lord Chamber Men - those lucky enough to perform for the Queen of England on many occasions. Alongside his novels and plays, he also published many poems in his own style.", "As Dickens's reputation grew, the question arose whether to preserve his legacy and make it live on. Dickens himself was always keen to make his mark and to maintain his uniqueness. He even attempted to break the dominance of the popular comedies of the time with a series of dramatic plays.", "To mark the 400th anniversary of Dickens’ death, there will be a number of events to help readers, and especially students, better understand his works. There will be videos detailing the content of each of his works to help people excitedly explore the pinnacle of language and the meaning his works bring to our daily lives."], headings: ["Difficulties for modern readers", "Dicken’s early success", "Dicken for our time", "Trying to protect his property", "The influence of the media", "Bring the books to life", "Keep the reader guessing"], answers: [2, 0, 6, 4, 1, 3, 5] }
+        },
+        {
+            id: 2, title: "Test 2: Children & Exercise",
+            part1: { text: "I {1} in a flat. I {2} it with my friend. We are in the same {3}. We {4} to work. We like to {5} dinner.", options: [["go","live","walk"], ["share","drink","hold"], ["door","class","chair"], ["drive","smile","say"], ["hold","cook","melt"]], answers: ["live", "share", "class", "drive", "cook"] },
+            part2: { topic1: { title: "Delivery Man", sentences: ["You must return your keys to the office manager after you get back.", "You should arrive at the main office by 6.30am and collect your keys.", "You must follow the route on the map to deliver packages.", "When you have completed all deliveries, return to your office.", "In the office, you can also collect a map of your route."], order: [5, 1, 3, 4, 2] }, topic2: { title: "Conference Hall", sentences: ["When you arrive at the conference hall, give your booking number.", "After he finishes, there will be time for questions.", "Inside you will find a schedule of events and the information of the key speaker.", "If you would like to attend his talk, it will take place in the main hall at midday.", "A staff member will note this down and give you a welcome pack."], order: [1, 5, 3, 4, 2] } },
+            part3: { people: ["A", "B", "C", "D"], texts: { A: "This is my first time coming to this restaurant. The food is very cheap but the quality is excellent. I was very surprised with the starter because its menu is very diverse. But there is one thing that I want the restaurant to improve. The restaurant band played live music but it was very far away, so the sound was very low and it didn't make the meal atmosphere lively. Next time turn the music louder, please!", B: "This is a very famous restaurant that I saw in the newspaper. Sadly, I arrived later than the rest of the party, so I didn't get to order dinner. However, I ordered orange juice and mango juice and they were both delicious. What about the surroundings? Lively music along with fashionable and appropriate decor makes me feel very comfortable.", C: "I'm not sure if I will return to this restaurant. I think the staff was arguing when I got there, because the atmosphere here was not very comfortable. As for the food, I think there's nothing to write about. I ordered fish and chips, it wasn't bad, but it wasn't good either. But many people say that the food here is fabulous. So, I think I'm an exception.", D: "I don't understand why this restaurant is so famous. When I arrived and saw a menu with lots of different dishes, I saw this as a bad sign. Furthermore, the menu with traditional dishes contrasting with the modern decoration style made me feel very confused and strange. The waiters here were also not friendly. This was one of my worst experiences eating at a restaurant." }, questions: ["Who thought the music was too quiet?", "Who will definitely not return to the restaurant?", "Who was impressed by the range of appetizers?", "Who thinks the food was of average quality?", "Who thought his bad experience was probably unusual?", "Who enjoyed the atmosphere?", "Who didn't eat anything at the restaurant?"], answers: ["A", "D", "A", "C", "C", "B", "B"] },
+            part4: { paragraphs: ["In recent years, children have become increasingly inactive. While technology often receives blame for this trend, it is not the only factor at play. Urbanization has led to a lack of safe play spaces for kids. Many neighborhoods no longer have parks or playgrounds, forcing children to stay indoors. This combination of screen time and limited physical activity opportunities is contributing to a decline in children's overall fitness and health.", "Currently, the issue of children not getting enough exercise is worsening, largely due to the time they spend staring at screens. The allure of laptops and smartphones is hard to resist, making it difficult for both parents and children to limit their use. As awareness grows about the importance of physical activity, it is essential for everyone to recognize the seriousness of this problem and work together to find effective solutions that encourage a more active lifestyle.", "One inspiring example comes from a teacher who implemented a program called the Daily Mile. Each day, students are encouraged to run at least one mile, and this simple idea quickly gained popularity. It has won awards for its effectiveness and has spread to over 3,500 schools in more than 30 countries, thanks to media coverage and positive testimonials. This initiative highlights how even small changes can have a significant impact on promoting physical activity among children.", "The Daily Mile program not only enhances fitness levels among students but also has surprising benefits for their academic performance. Teachers have reported that students participating in this program are more focused and alert during lessons. Psychologists support this observation, suggesting that a healthy body leads to a healthy mind. The saying \"a strong body, a strong mind\" appears to hold true, as regular physical activity positively influences students' ability to learn and retain information.", "The design of our environments can significantly impact how we behave. For instance, workplaces are often designed to enhance productivity, and homes are structured to encourage communication. Similarly, schools can be designed to promote physical activity. By creating spaces that encourage movement, such as open areas for play and exercise, educators can foster more active lifestyle among students, helping to counteract the trend of inactivity.", "One innovative architect from Japan has designed a kindergarten with a unique approach. The playground is structured like a running track, allowing children to run and play freely. This creative design has proven successful and has even received awards for its impact on children's activity levels. Such thoughtful architectural designs can inspire other schools to rethink how they create environments that promote both learning and physical activity.", "The Daily Mile initiative and the Japanese architect's playground represent two ends of the economic spectrum. The Daily Mile is a cost - effective program that requires minimal investment, while the architect's design involves significant funding. Local authorities must consider various factors when striving for a balance between promoting physical activity and managing budgets. By exploring both affordable and innovative solutions, communities can create environments that support children's health and well - being."], headings: ["The success of a simple idea", "Achieving the right balance", "The wider effects of regular activity", "The situation has the potential of being worst", "Ways in which environment can influence behaviour", "Factors contributing to inactivity", "A design for exercise and for study"], answers: [5, 3, 0, 2, 4, 6, 1] }
+        },
+        {
+            id: 3, title: "Test 3: Coffee",
+            part1: { text: "I am living with a family {1} the city. The children are {2} to me. Seamus and Agnes {3} speaking English with me. Sometimes, I {4} to Seamus and Agnes. I hate the food, {5} yesterday I ate out.", options: [["next","near","under"], ["cruel","noisy","friendly"], ["read","hold","practise"], ["see","read","say"], ["then","so","also"]], answers: ["near", "friendly", "practise", "read", "so"] },
+            part2: { topic1: { title: "Paper Work", sentences: ["When you do this, a new window will open.", "After you send your course work, you should check your email.", "In your account, press “open a new window”.", "Once you put the files there, press the “send” button.", "Simply drag or drop your files."], order: [2, 5, 1, 4, 3] }, topic2: { title: "Traffic Lights", sentences: ["As a result of these delays, many people were not able to get to work on time.", "This created long delays in the roads to the city’s business district.", "Therefore, there were not further delays for people going back home.", "They were out of order and the traffic moved very slowly.", "Fortunately, in the evening, the traffic lights were working again."], order: [3, 2, 5, 1, 4] } },
+            part3: { people: ["A","B","C","D"], texts: { A: "My wife often complains about not having time to read, and I say we have to make our own time. So, I often calculate my free time on my phone. so I can know in advance whether I should bring a book to read on the train. My wife often laughs at me for doing so, but I don't mind, as long as I can finish reading so many books.", B: "I used to struggle very much to finish reading a book that we were expected to read. However, now that I read for my own pleasure, I don't mind too much. I usually don't limit myself to reading one at a time. There are so many titles I can choose from that get me excited. I have a list of books that I want to read in the future.", C: "I often keep a book on the bedside table to read before going to bed. The problem is, I get tired after reading only half of a page, and I fall asleep. So, I've been reading that one book for half a year now and have only read chapter 2. However, when I read factual books, I find it very interesting and it keeps me awake for hours.", D: "My job requires reading a lot of books. These books include a lot of facts and figures and they are very boring. When I have free time, I usually want to read light books, like mystery novels or comedy. I often read on the train to work. I have a young child, so when I come home I almost don't have time to read. Therefore, I have to read books when traveling by train. So, a book can last me 1 week." }, questions: ["Who wants to read a lot of books?", "Who plans their reading schedule?", "Who reads many books at once?", "Who reads more than another family member?", "Who is having difficulty in finishing a book?", "Who thinks that factual books are boring?", "Who has limited time to read books?"], answers: ["B", "A", "B", "A", "C", "D", "D"] },
+            part4: { paragraphs: ["The custom of drinking coffee has been around for a long time, perhaps as long as 1500 years ago. There were times when drinking coffee was banned in many places. At that time, coffee houses were opened in some places in Egypt and Ethiopia. Later, the custom of drinking coffee spread to Italy and all over Europe. Not long after that, the Dutch introduced coffee to Asia. Later, the habit of drinking coffee became popular all over the world.", "Coffee was first used in Africa but Europe is known as the largest coffee consuming region in the world. In the 18th century, many people from different professions such as writers, philosophers and politicians used coffee to stay awake during discussions and meetings. Coffee houses became meeting places for people to share ideas and debate hot topics in society. These places made it easy for people to share their intellectual thoughts and played an important role in business and society at that time.", "Nowadays, many people have the habit of drinking coffee in the morning to wake up, or going to coffee shops in the evening to meet and socialize with each other. Coffee shops are popping up everywhere, providing places for people to relax and talk to each other. Coffee has become a global business, with personal coffee makers even appearing in households. Famous global coffee brands have become giant companies, using their brands and communication strategies to attract millions of coffee lovers around the world.", "Coffee consumption in Europe accounts for about 90% of global coffee production, making it the largest market in the world. Meanwhile, some other countries in Africa such as Egypt and Ethiopia rely heavily on coffee exports to sustain their economies. However, there is a problem of injustice: workers in these African countries face terrible living and working conditions, with incomes as low as $1 a day. While wealthy European countries make huge profits from coffee, people in coffee-growing countries do not receive a fair share of their efforts and hard work.", "To address this injustice, certification schemes for agricultural production have been introduced. If coffee meets certain certification standards, it can be sold at fair prices, preventing growers from having to sell at rock-bottom prices. However, there are problems with this solution. In reality, only about 5% of coffee meets the standards. Many small coffee producers in developing countries are too poor to pay the certification fees, leaving them even further behind in the global coffee market.", "There is much debate about the effects of coffee on human health. It is true that coffee can help many people stay awake and concentrate. It contains antioxidants, which can help prevent diseases. But while drinking coffee, people often add sugar and milk and these can be harmful to your health. This can easily cause diseases such as diabetes or obesity for those who use it.", "There is a legend about coffee. In the past, a monk observed that birds became more active and lively when they ate a small fruit. The monk then drank the juice from the fruit and stayed awake praying and talking until late at night. So it can be said that thanks to these birds, people knew about the coffee plant."], headings: ["Coffee encourages the art of conversation", "Problems of coffee economy", "The ancient origin of coffee", "Health risks versus health benefits debate", "The custom of coffee drinking begins to spread", "A remedy of unjust revenue distribution", "A habit that has become a big economy"], answers: [4, 0, 6, 1, 5, 3, 2] }
+        },
+        { id: 4, title: "Test 4: Consumer Age", part1: { text: "Dear Mum and Dad, I just got here. Everyone is {1}. My flat is near university, so I can {2} to my class. There is a girl living with me, I met her for the {3} time. She is from France and she can {4} 5 languages. We eat dinner {5}.", options: [["friendly","melty","noisy"], ["train","sleep","walk"], ["very","first","one"], ["talk","say","speak"], ["toward","together","another"]], answers: ["friendly", "walk", "first", "speak", "together"] }, part2: { topic1: { title: "Hand in Assignment", sentences: ["When you are sure there are no mistakes left, print out your report.", "First, it is a good idea to check your report and correct mistakes.", "The staff member will take your report and confirm that everything is complete.", "Next, complete a cover sheet with your name and your student number, and attach it to your printed assignment.", "Bring your assignment with the attached cover sheet to the front desk in the main hall."], order: [2, 1, 5, 3, 4] }, topic2: { title: "Car Park", sentences: ["The machine will read your information and tell you how much you have to pay.", "This ticket will show the date and the time you arrived.", "When you arrive, please take a ticket from a machine at the entrance.", "Before you leave, please put the ticket on the machine by the gate.", "Please display the ticket with this information in the window of your car."], order: [5, 2, 1, 4, 3] } }, part3: { people: ["A","B","C","D"], texts: { A: "When I first came to this city, I felt very scared because this city is very big. The city has many parts and the shopping part is very far from the green part. However, we already had the bus route and we signed up to take the bus for a full day. Buses are very cheap and very convenient. I feel very lucky to not have to put pressure on my sore feet", B: "I don't like big cities and rarely go out to cities. But I go to the StevenSon city very often. I go there about five to seven times a year. There is an area outside the city. In that area, there are many things that I need. There is a lot of water, a natural area, a small forest and a special camping area. I really like coming to this place to rest. It also has a great coffee serving area for visitors", C: "I went to this city last summer and really liked the atmosphere of this city. The reason I like the atmosphere here is because it has a lot of public performances. These performances often take place in front of department stores. So this prevents me from shopping inside those stores. I was very surprised when I came home with an empty bag and I didn't buy anything.", D: "When I go out, I only care about two things: good food and a good play. I especially liked the lunch I had in this city, it was delicious and I really want to come back here next time. However, I guess it's a bit expensive and I have to walk a long way to get there. However, it didn't matter because I had a wonderful day" }, questions: ["Who likes the natural resort here?", "Who thought public transport system was good?", "Who wants to visit one part of the city?", "Who likes the public theatre that the city puts on?", "Who pays a lot for their meal?", "Who usually spends a lot of money on shopping?", "Who thinks walking too much causes a problem?"], answers: ["B", "A", "B", "C", "D", "C", "A"] }, part4: { paragraphs: ["Mrs. Judith Levine - a journalist and her husband decided to change their lifestyle to be as minimalist as possible. They only buy what is absolutely necessary, such as food for work. They do not go to the cinema, cafes, restaurants. As a writer, I can say that she is saving for a purpose of publishing her findings as a book.", "Published in 2006, the book Not Buying It when reread 10 years later still holds its value. They believe that journalist Ms. Levine has the ability to predict future consumer trends. The minimalist lifestyle she mentioned has become a trend today.", "To make this experiment as realistic as possible, Ms. Levine and her husband decided not to tell anyone, because they knew that once their friends knew about this plan, they would mention the issue of paying for the couple's share when they went out together. Therefore, the couple was determined to keep it a secret from friends, family and strangers.", "The couple wanted to buy a gift as a gift. However, that went against their point of not buying unnecessary things. And they decided to make it themselves to have a lower spending level. However, none of them have any aesthetic talent, so they finally decided to give a meaningful and practical gift to the recipient, which is a piece of their jewelry.", "Lessons about minimalism in today's consumer trends: buy things that are really necessary, switch from driving cars and motorbikes to cycling and walking.", "Ms. Levine does not have an office, which is quite inconvenient when she has to meet partners in a coffee shop. When working alone, she often goes to the public library and finds it very convenient.", "In today's modern consumer age, people tend to own more than they used to. A worker only has 5-6 pairs of shoes in his entire life. And he will repair them when they break or wear out, not throw them away. Nowadays, if we have a phone, it is expected that you will use such electronic devices throughout your life." ], headings: ["A temporary experiment", "Still relevant to our times", "Important lessons for all of us", "The difficulty of being generous", "Making things last longer", "Reason to reach a compromise", "The reason of secrecy"], answers: [0, 1, 6, 3, 2, 5, 4] } },
+        { id: 5, title: "Test 5: Doggett", part1: { text: "I start {1} in the morning. I have {2}. I {3} the office. I go home in my new {4}. I go to bed when I feel {5}.", options: [["sleep","early","angry"], ["lunch","bed","tutor"], ["go","leave","return"], ["bag","jeans","car"], ["sleepy","angry","alert"]], answers: ["early", "lunch", "leave", "car", "sleepy"] }, part2: { topic1: { title: "Race", sentences: ["A member of staff will give you a numbered armband to wear.", "On your arrival, please go to the information point at the north gate.", "To do this, you just need to give us your photo card.", "Please put this on immediately and join other competitors at the warm-up area.", "Runners must register here at least 30 minutes before the race starts at 9am."], order: [4, 1, 3, 5, 2] }, topic2: { title: "Fire Instructions", sentences: ["When you reach the bottom of these stairs, leave the building through front entrance.", "Next, walk calmly to the doors marked Emergency Exit.", "Outside, gather on the grass and wait for further instructions.", "Through these doors, there are stairs leading you to the ground floor.", "When you hear the alarm, leave your bags and belongings at the desk."], order: [4, 2, 5, 3, 1] } }, part3: { people: ["A","B","C","D"], texts: { A: "I see too many people who do not arrange a good time to travel to work, they often arrive at work late. I always think in advance about what time I will get to work tomorrow and what means of transport I will use.", B: "Buses are often full of people, especially during rush hour. This makes me very uncomfortable when I have to travel to work by bus. The public transportation improvement plan proposed by the city is very reasonable and it will improve the above situation a lot.", C: "In my opinion, the bus is very clean and comfortable to travel. I find it has a lot of space for everyone, and the bus system is also very large. Therefore, I think improving the public transport system is unnecessary, while the old system is still good.", D: "Building a new public transportation system will be very costly. And we all know it's at the expense of residents. I think we should use that money for something more beneficial, which is building more hospitals. Hospitals in this living area are very few." }, questions: ["Who thinks the new station will cost too much to build?", "Who thinks the bus is too busy?", "Who thinks transport system doesn't need improving?", "Who thinks people should plan their journeys better?", "Who thinks the bus service is good?", "Who thinks better medical facilities are needed?", "Who thinks the new station will improve train travel?"], answers: ["D", "B", "C", "A", "C", "D", "B"] }, part4: { paragraphs: ["Unlike many modern sports competitions, the Doggett’s Coat and Badge race offers no financial reward. The red coat and silver badge have cultural and emotional value, but not monetary. Contestants take part out of pride, tradition, and a deep respect for the waterman’s profession. Many dedicate months to training, not for riches but for the honor of winning one of Britain’s most historic races. The lack of financial incentive may even enhance the race’s prestige, showing that commitment to heritage and community can outweigh commercial interests. In today’s world, that kind of motivation stands out as truly admirable.", "Although the Doggett’s race remains one of the oldest sporting events in the world, some have raised concerns about its future. With modern boats, technology, and shifting interests among younger generations, participation has declined in recent decades. Suggestions have been made to modernize the race to keep it relevant—perhaps by changing the route, updating the boats, or increasing promotion on social media. Others argue that preserving tradition is more important than making it popular. This ongoing discussion reflects broader challenges faced by many traditional events in the modern world: how to honor the past while adapting to the present.", "Winning the Doggett’s Coat and Badge race is not just about rowing fast—it’s about gaining respect within a close-knit community. For many, this competition represents an important rite of passage. It is often the first time a newly qualified waterman competes on such a historic stage. Success in the race can lead to recognition, offers from exclusive rowing clubs, and opportunities to participate in ceremonial roles along the Thames. Even those who do not win often benefit from simply being involved. The reputation built through this race can carry weight throughout a rower’s career, especially in London’s traditional maritime circles.", "The Doggett’s Coat and Badge race was established in 1715 by Thomas Doggett, an Irish actor and theatre manager, who became well known in London. According to popular accounts, Doggett once narrowly escaped drowning while traveling on the River Thames. To express his gratitude for the boatman who saved him and to honor the newly crowned King George I, he created this race. It was open to young watermen who had recently completed their apprenticeships, giving them a chance to demonstrate their rowing skills. Over time, this event became not just a tribute to a personal event, but a long-standing tradition that celebrates both history and the craft of rowing on the Thames.", "One of the most heartwarming aspects of the Doggett’s race is its multi-generational appeal. In several families, competing in the race is a proud tradition passed from one generation to the next. It’s not uncommon to hear stories of grandfathers, fathers, and sons all having taken part over the years. Some families even have multiple winners across decades. These personal connections add emotional depth to the event and preserve its history in living memory. For these families, the race is more than a competition—it’s a legacy. The bond between relatives strengthens as they share stories, train together, and wear the symbolic red coat with pride.", "The prize awarded to the winner of the Doggett’s Coat and Badge race is unlike any ordinary trophy. Instead of money or medals, the champion receives a traditional red coat and a silver badge. These items are deeply symbolic and represent the pride and respect historically associated with watermen. Each piece is custom-made for the winner and presented in a formal ceremony that highlights the cultural importance of the event. The coat reflects 18th-century styles, while the badge often includes royal imagery and references to the Thames. This unique reward continues to connect the modern race with its historical roots and honors the profession’s heritage.", "In the early 18th century, London’s roads were often muddy, overcrowded, and difficult to travel on. As a result, the River Thames served as the main “highway” through the city. People frequently used water taxis—small boats rowed by trained professionals called watermen—to move around quickly. These water journeys were not only faster but often safer than traveling by road. For many Londoners, taking a boat was the most efficient way to attend work, markets, or social events. The Doggett’s race, therefore, celebrates not just rowing skill, but the essential role that watermen played in daily life during that time." ], headings: ["Earning a reputation", "Not in it for the money", "A need for change", "The easiest way to travel", "Origins of what the winner receives", "Generations of champions", "Result of a lucky escape"], answers: [1, 2, 0, 6, 5, 4, 3] } },
+        { id: 6, title: "Test 6: Early Australia", part1: { text: "The water is {1}. The {2} is out. I have an {3} holiday. After {4} so hard. I hope to {5} your letter.", options: [["sour","clear","see"], ["wind","dust","sun"], ["tired","enjoyable","good"], ["working","sleeping","eating"], ["tell","read","forward"]], answers: ["clear", "sun", "enjoyable", "working", "read"] }, part2: { topic1: { title: "Report", sentences: ["You should also include a list of books that you use for reference.", "When you have finished your report, correct all the mistakes.", "Remember to save links to websites and include them in your report.", "Before you start to write your report, you should look at websites for the information you need.", "After you make the corrections, send your report by your email."], order: [3, 4, 2, 1, 5] }, topic2: { title: "Printer", sentences: ["Before using the printer, you need to put papers into it.", "A light comes on at the front of the printer.", "When your printer is in place, turn it on using the switch.", "If the light is green, your printer is ready to use.", "First, you need to find an appropriate place to put your printer."], order: [5, 3, 2, 4, 1] } }, part3: { people: ["A","B","C","D"], texts: { A: "I know a little about famous painters and their works. But I don't like going to art exhibitions unless my friend invites me. I like extracurricular activities more, painting exhibitions seem too quiet to me. I like to draw, and I have been drawing ever since I can remember. My forte in drawing is animals, especially big and ferocious animals.", B: "I find going to see paintings similar to reading books. You must look and read before discussing. When I go to exhibitions with my friends, they often talk before seeing the painting, and what they talk about isn't even about the painting, that's annoy me.", C: "I find polite art very fascinating. I often go to talks about arts and I have gone to many foreign art exhibitions and artists' houses. It's great to see their works and where they worked.", D: "My parents often took me to see art exhibitions when I was a child. and I think that habit remains. Currently, I often take my children to the exhibition, which is a lovely activity for me. I often ask my children to do other activities while looking at pictures, for example, think of a story for that picture, so they don't get bored." }, questions: ["Who prefers going to art exhibitions with other people?", "Who has some artistic skills?", "Who prefers seeing exhibitions by themselves?", "Who thinks seeing exhibitions is a boring activity?", "Who has a good knowledge of art?", "Who thinks visitors should focus on the art?", "Who has been going to art exhibitions all their life?"], answers: ["D", "A", "B", "A", "C", "B", "D"] }, part4: { paragraphs: ["Despite the many difficulties, both ancient and modern explorers showed incredible perseverance in reaching and understanding Australia. Whether navigating unknown seas in simple rafts or trekking across searing deserts with limited supplies, their determination pushed the boundaries of what was thought possible. Stories of survival and discovery continue to inspire awe, reminding us of the strength and courage required to explore the unknown. Through the centuries, this spirit of exploration has become a core part of Australian history and identity.", "It is now widely believed that the journey to Australia wasn’t completed in one go. Instead, early humans likely reached the continent in stages, moving through island chains and coastal areas over generations. This theory is supported by the distribution of artifacts and remains across Southeast Asia and Northern Australia. The idea of gradual migration, rather than a single wave, helps explain the diversity of early populations found on the continent. This step-by-step approach also reflects how ancient peoples adapted to different environments as they moved closer to the Australian mainland.", "Many of the first explorers to attempt crossing Australia's interior were ill-prepared for the harsh conditions they encountered. Without sufficient knowledge of the land or survival skills in such a hostile environment, numerous expeditions ended in tragedy. The lack of understanding of the Aboriginal methods of finding water, navigating terrain, and managing heat led to avoidable suffering. It wasn't until later that European settlers began to adapt, learning from Indigenous Australians how to travel and survive in such an unfamiliar landscape.", "The vast Australian outback and its harsh deserts have long posed a formidable challenge to resettlement and development. For thousands of years, the central areas of the continent were difficult to inhabit due to extreme heat, scarce water sources, and isolation. Even after European arrival, these natural barriers prevented deeper exploration and settlement for decades. Today, the environment still remains an obstacle, limiting infrastructure, agriculture, and population growth in these regions. The Australian landscape, while beautiful and iconic, continues to shape the way communities are formed and connected.", "In recent years, new evidence has emerged from both land and sea, prompting scientists to re-evaluate earlier assumptions. A set of ancient tools discovered in a Northern Territory cave doesn't match previously known Aboriginal designs, leading some to speculate about earlier migrations or even contact with other civilizations. Additionally, genetic studies hint at complex interactions with now-extinct human species. These findings, while not yet definitive, open the door to exciting discussions and possibilities about Australia's earliest human history.", "Advancements in marine technology have revolutionized our understanding of ancient migration routes to Australia. Underwater sonar mapping and satellite imaging have revealed submerged land masses and potential seafaring paths once used by early humans. Archaeologists are now uncovering tools and fossils deep beneath coastal waters, which provide new insights into how long ago people arrived on the continent. These discoveries would not be possible without modern equipment that allows exploration of areas previously inaccessible. As research continues, scientists hope to fill in many historical gaps that have puzzled historians for centuries.", "Some researchers are rethinking the traditional narrative of how Australia was settled. While it is widely believed that the first people arrived via land bridges from Southeast Asia during the Ice Age, new theories suggest otherwise. Alternative histories propose that early humans may have used rudimentary boats to cross from distant shores far earlier than previously estimated. These claims are controversial but are supported by some archaeological findings and oral traditions of Indigenous communities. Such ideas challenge the Eurocentric view of exploration and emphasize the ingenuity of early seafarers long before written records existed." ], headings: ["A Journey made by stages", "A new evidence that leads to speculation", "An alternative history of settlement", "Lack of knowledge and skills", "Determination of the explorers through the ages", "Natural barrier to resettlement", "Technology helps uncover the ocean’s secret"], answers: [4, 0, 3, 5, 1, 6, 2] } },
+        { id: 7, title: "Test 7: Eating in China", part1: { text: "I imagine you don't want to {1} this. I {2} you earlier but you were not home. Can you be {3} before 7pm? I can {4} you at your place then. Don't have too much {5} because we're going to eat cake.", options: [["love","remember","miss"], ["called","told","said"], ["early","sleepy","ready"], ["hold","meet","miss"], ["talk","pencil","dinner"]], answers: ["miss", "called", "ready", "meet", "dinner"] }, part2: { topic1: { title: "Betty Barr", sentences: ["In the 1980s, she finally returned to China and still lives with her Shanghai husband, George Wang.", "After she finished her school, she went to Wellesley College, a famous university in USA.", "However, she missed China, and applied for a job in Hong Kong, where she taught from 1959 to 1972, and learnt to speak Cantonese, the local language.", "At that time, Shanghai is a city filled with many people from different countries.", "She was born in Shanghai in 1933 to an American mother and a father from Scotland."], order: [5, 3, 4, 2, 1] }, topic2: { title: "Key Card", sentences: ["If you lose this, you will need to see the staff member at the front desk.", "You will also need to show your identification card.", "He or she will ask for your name and your flat number, and then will write these down.", "To enter the building and use the lift, you will need your key card.", "He or she will make a copy of it and give you a new key card."], order: [2, 4, 3, 1, 5] } }, part3: { people: ["A","B","C","D"], texts: { A: "I feel very lucky to have this park here. My family and I often go to the park because of the natural landscape here. It's different from the city, which is very busy and full of dust. Unfortunately, I am away this weekend so I cannot help with the cleaning. However, I know my brother and his friends will be very interested in this cleanup so I will ask them if they can help.", B: "I'm a very busy person and I have to spend this weekend with my family because I only have the weekend as free time. I think young people who don't have families should help. Besides, students and schools also have days off on weekends. I think this volunteering will be very helpful for students' future careers.", C: "I think this volunteering is a good idea but it doesn't have a long-term vision. When volunteers clean up the park, it will be clean, but it will become busy again after about a month when tourist season arrives. I think we should clean this park regularly about once a month. Surrounding areas such as the lake and local forest should also be cleaned up. We should also have signs telling visitors to clean up their trash. I am very upset when I see a lot of trash on both sides of the road.", D: "My family and I often spend time at the park. My children love going to the park and they find the park a very interesting place to visit. My son has a dream of becoming a biologist so I think cleaning up this park will be very helpful for my son. I think we should pique children's interest in cleaning. They will be more willing to volunteer and help others." }, questions: ["Who thinks volunteering is important for students?", "Who thinks the park is a beautiful place to relax?", "Who asks for others to help?", "Who thinks the cleaning needs to be done regularly?", "Who can't clean the park because of their busy work?", "Who asks for others to help?", "Who thinks local areas need cleaning?"], answers: ["D", "A", "A", "C", "B", "A", "C"] }, part4: { paragraphs: ["There are signs that Chinese food culture and eating habits are changing. Chinese people now consume a wide variety of foods from many different countries. People in cities also prefer fast and convenient foods. In addition, some traditional products such as milk are consumed less by Chinese people than in the past.", "The concept of yin and yang has a complex influence on Chinese cuisine. In fact, this concept also appears in many other areas of life. It can be understood that yin and yang are opposite elements that complement each other to achieve a certain balance. Sweet and sour, cold and hot are typical examples of this concept. Some foods can be classified into hot or cold groups, such as lemon is considered cold and onion is considered hot. Based on this concept, Chinese people choose suitable foods to maintain the balance of the body.", "Cooking methods are also regionally specific, in addition to the differences in food in these regions. However, there are some food techniques that are considered to be standard in Chinese culture. For example, vegetables are cut into small pieces and eaten with chopsticks. The Chinese have a long history of using chopsticks. The Chinese also often leave fish and meat with bones. According to them, this makes the food more delicious. Steaming is a very popular form of cooking. In addition, frying food with cooking oil is also commonly used.", "In addition to the concept of yin and yang directly influencing the culinary culture, the Chinese also pay close attention to the availability of ingredients. Each region has its own ingredients, and this leads to differences in regional cooking styles. The coastal areas in the south of the country are famous for seafood dishes. In the north, the widespread cultivation of wheat has led to noodle dishes. The southwestern regions are famous for spicy soups, while some regions are famous for grilled meat.", "The change in Chinese eating habits has a global impact. Due to its huge population, the food demand of the Chinese market will directly affect domestic and international food production. The change in diet leads to problems such as the increase in related diseases that a large economy like China is prone to. Therefore, achieving a balance like the yin-yang philosophy in Chinese culinary culture is clearly a big challenge.", "The most common way for Chinese people to eat is street food. It is very common to see stalls selling all kinds of food on both sides of the road. This has become a part of the food culture. For large dining events, the food is often placed in the middle of the table so that guests can try different dishes. The meal is served with tea and sometimes rice wine from the local area.", "Chinese culinary culture is like most other cultures in the world. It started with very basic hunting and gathering. Over time, society gradually developed, and with it, culinary culture developed. Gradually, cuisine became an art form and seemed to reach its peak in the 19th century. Although most Chinese people choose simple food with rice and vegetables, it is undeniable that Chinese culinary art has reached the level of exploiting the maximum flavor and each ingredient." ], headings: ["Regional variations", "Effects of a changing diet", "The influence of philosophy", "The origins of chinese food", "Changes in the Chinese diets", "Cooking methods", "The style of eating"], answers: [4, 2, 5, 0, 1, 6, 3] } },
+        { id: 8, title: "Test 8: Frozen Land", part1: { text: "I just reviewed the latest report, but the budget doesn’t {1}. Could you get the financial {2} and check for any errors? I {3} it will help clarify the issue. Please read the information {4} so we don’t miss any details. Also, send me the results {5} you go home, not after.", options: [["work","count","balance"], ["department","statement","accountant"], ["sure","assure","think"], ["beautifully","fluently","slowly"], ["when","before","between"]], answers: ["balance", "statement", "think", "slowly", "before"] }, part2: { topic1: { title: "New Students", sentences: ["You can use this card to borrow books from library and access lesson materials online.", "A member of staff will ask for your name and your address.", "You will find these in material links on your home page.", "When you arrive at the university, go to the help desk.", "He or she will enter your information into the computer and give you an identification card."], order: [4, 2, 5, 1, 3] }, topic2: { title: "Solve Problem", sentences: ["You can also compare your results with experiments in the past.", "Then, you need to perform experiments to see if these ideas are true or not.", "The next one is to form a hypothesis or an idea based on your information.", "In this way, you can add to your knowledge of the subject for future experiments.", "The first step is to find out what you know about the problem."], order: [4, 3, 2, 5, 1] } }, part3: { people: ["A","B","C","D"], texts: { A: "Last year, I went on a mountain climbing trip with my friends. It was the most horrible trip I have ever experienced. However, after that trip, I had a strong passion for walking. So now, every day I walk as a hobby, and it also helps my health a lot. I'm old so I'm no longer interested in traveling to far away places. Instead, I want to lie on a comfortable sofa and watch my favorite TV show.", B: "When I travel somewhere, I often ask for bus routes to famous tourist destinations so that I can get to those places as quickly as possible and avoid wasting time going around. Famous tourist destinations are the places I want to explore the most when traveling somewhere. I don't understand why many people just like to sit still at the beach when traveling, I find that uninteresting and time-consuming.", C: "My family and I often plan to travel every time we have a vacation. If the weather is nice then our plans go ahead as usual, if not, we will postpone that vacation. For my family, light wind and warm sunlight are important when we go out. A few of my friends invited me to go climbing, but I'm afraid of heights so I refused them. However, in the future I really want to try mountain climbing once.", D: "Next month's trip will be the first time I travel to another country. Normally I only travel to famous local places or in my country. These places are beautiful but I'm so excited to travel to a foreign place once in my life." }, questions: ["Who prefers to stay at home?", "Who thinks a holiday requires good weather?", "Who likes seeing tourist attractions?", "Who wants to go mountaineering trip?", "Who has never been abroad?", "Who likes going walking?", "Who think going to the beach is boring?"], answers: ["A", "C", "B", "C", "D", "A", "B"] }, part4: { paragraphs: ["Despite being covered in thick sheets of ice, Antarctica has a surprisingly diverse and dramatic landscape hidden beneath its surface. Using ground-penetrating radar and satellite imaging, scientists have discovered vast mountain ranges, deep valleys, and even ancient lakes buried under kilometers of ice. These findings suggest that Antarctica was once a very different environment. Studying this hidden geography helps researchers understand the Earth's geological past, as well as how changes in climate may affect the region’s ice coverage in the future.", "Antarctica has often been described as the end of the Earth. Located at the southernmost point of the planet, it remains one of the most mysterious and least accessible places for humans. It’s surrounded by the Southern Ocean and sits opposite the Arctic in the global geography. For centuries, explorers speculated whether such a place existed at all. Today, while satellite images and scientific missions provide more data, the continent still retains an aura of the unknown, attracting adventurers and scientists who want to experience the planet’s final frontier.", "Although Antarctica is not claimed as a country, several nations have laid territorial claims over parts of the continent. However, under the Antarctic Treaty System signed in 1959, no single country has full ownership. Instead, the region is governed collectively by over 50 countries that have agreed to preserve it for peaceful and scientific purposes. No military activity is allowed, and scientific cooperation is encouraged. This unique model of international governance helps protect the fragile environment of the frozen land and ensures that its resources are not exploited for commercial gain.", "The early 20th century saw a dramatic competition between nations to reach the South Pole. Most famously, British explorer Robert Falcon Scott and Norwegian Roald Amundsen led rival expeditions. Amundsen reached the Pole first in 1911, using dog sleds and careful planning. Scott arrived weeks later, only to perish on the return journey with his team. The race to the pole was one of the most extreme tests of human endurance and remains one of the most iconic chapters in the history of polar exploration.", "Antarctica is the coldest place on Earth, with temperatures regularly dropping below –60°C in winter. The continent’s high altitude, its position near the South Pole, and the fact that sunlight is absent for months all contribute to its extreme chill. Its white ice surface also reflects most of the sun’s heat back into the atmosphere. These unique features make it difficult for heat to accumulate, and as a result, the region remains frozen even in summer. Understanding these conditions helps scientists study global weather patterns and climate change.", "The first known landing on Antarctica took place in the early 19th century when a group of seal hunters unintentionally arrived at the icy coastline. Later, exploratory missions were organized specifically to set foot on the continent. In 1895, a Norwegian expedition became the first officially recognized landing. These early steps were dangerous and uncertain, with little knowledge of the terrain or weather. Still, the achievement marked a turning point in human exploration, showing that even the most remote and inhospitable places on Earth could be reached with courage and persistence.", "Travel across Antarctica remains one of the most difficult journeys on Earth. However, modern technology has significantly reduced the physical effort required. In the past, explorers dragged heavy sleds by hand or used animals, often in dangerous and freezing conditions. Today, snowmobiles, tracked vehicles, and even aircraft allow researchers to move equipment and people more easily. While the environment is still harsh, advances in transportation and survival gear make scientific missions more efficient and less life-threatening than those of early explorers." ], headings: ["First step on the ice", "Less effort needed", "Why is it so cold?", "Where is the end of the Earth?", "Who is in charge?", "Race to the pole", "Hidden geography"], answers: [6, 3, 4, 5, 2, 0, 1] } },
+        { id: 9, title: "Test 9: Meatless Diet", part1: { text: "It is {1} what I like. And it is the perfect color, {2}. I am going to wear it {3} my birthday party. I will save you {4} cake. {5} my love to everyone.", options: [["yet","not","just"], ["so","too","to"], ["to","on","at"], ["many","none","some"], ["Give","Hold","Receive"]], answers: ["just", "too", "at", "some", "Give"] }, part2: { topic1: { title: "Buying House", sentences: ["Such requirements of course depend on your personal circumstances.", "In order to choose the right place, you need to consider several factors.", "Other factors to look at are the place of employment, shops and schools.", "The first and most important thing is to choose the location.", "The most important of these to look at is the price of homes."], order: [5, 2, 4, 1, 3] }, topic2: { title: "Public Cycle", sentences: ["When you finish your journey, return the bike to any empty collection point.", "Choose \"hire the cycle\" on the screen and then follow the instructions to receive an unlock code.", "When the light comes, you can unlock your bike and start your journey.", "Go to the collection point and click on the screen to choose the bike with your bank card.", "Enter the code on the lock of the bike and wait for the green lights."], order: [5, 2, 4, 1, 3] } }, part3: { people: ["A","B","C","D"], texts: { A: "Exercising with friends is a fantastic idea, don't you think? It adds a fun element to the workout routine. It's important to fuel our bodies properly, though. After a good workout, I always make sure to have a nutritious meal to replenish energy and support muscle recovery.", B: "Establishing a consistent workout routine has really helped me stay on track with my fitness goals. It's amazing how much more I can accomplish when I have a structured plan in place. Plus, it keeps me accountable and ensures I make time for physical activity every day.", C: "Age is just a number when it comes to exercise. Whether you're young or old, staying active is crucial for maintaining overall health and vitality. While competitions can be motivating for some, they're not necessarily suitable for everyone. It's important to find activities that are enjoyable and sustainable for each individual.", D: "Experiencing pain during exercise isn't necessary and it's a sign that something may be wrong. It's important to listen to our bodies and seek expert advice when needed, whether it's from a trainer, physical therapist, or medical professional. Taking care of ourselves properly ensures we can continue to enjoy physical activity without risking injury." }, questions: ["Who thinks experiencing pain is not necessary?", "Who thinks a routine can help us do more sport?", "Who thinks exercise is for both the young and the elderly?", "Who thinks a proper meal is important?", "Who thinks competitions are not useful for everybody?", "Who seeks expert advice at times?", "Who thinks work out with friends is a good idea?"], answers: ["D", "B", "C", "A", "C", "D", "A"] }, part4: { paragraphs: ["Factory farming—the industrialized method of raising animals for food—has been criticized for its negative effects on both animals and the environment. Animals are often kept in cramped, stressful conditions, and the use of antibiotics to promote growth raises concerns about resistance. Additionally, factory farms contribute to pollution and greenhouse gas emissions. These harmful impacts are among the key reasons why some people choose to reduce or eliminate meat from their diet. Supporting ethical and sustainable food sources is becoming a growing priority for many consumers.", "A common benefit reported by people who switch to a plant-based diet is improved health. Many experience lower cholesterol levels, better digestion, and increased energy. Vegetarian diets are often rich in fiber, antioxidants, and healthy fats. Studies show that people who consume more fruits, vegetables, whole grains, and legumes tend to have lower risks of heart disease and obesity. However, balance is key—a diet full of processed plant foods can still be unhealthy. When done right, a meatless diet can be a strong foundation for a healthy lifestyle.", "People adopt meatless diets for many different reasons. For some, religious beliefs guide their eating habits, while others avoid meat out of concern for animal welfare. Some are motivated by environmental issues, believing that reducing meat consumption lowers their carbon footprint. Health is also a major factor, as some studies link vegetarian diets to lower risks of heart disease and diabetes. The motivations are as varied as the people who choose them, and it's not uncommon for individuals to follow a plant-based lifestyle for a combination of reasons.", "Many people wonder if it's truly possible to live without eating meat. The answer is yes, as proven by millions of vegetarians and vegans worldwide. While it requires some planning to ensure a balanced intake of protein, iron, and vitamin B12, plant-based diets can be nutritionally complete. In fact, major health organizations have stated that well-planned vegetarian and vegan diets are suitable for all stages of life, including childhood and pregnancy. With a variety of plant-based options now available, choosing a meatless lifestyle is more practical than ever.", "Reducing meat consumption can also be seen as a global responsibility. Livestock farming is a major contributor to climate change, water usage, and deforestation. By choosing plant-based options, individuals can lower their environmental impact and support a more sustainable food system. Small changes made by many people can have a big collective effect. From conserving water to reducing greenhouse gas emissions, a meatless diet can be a meaningful step toward addressing some of the planet’s most urgent environmental challenges.", "Vegetarianism is not a single dietary choice but includes many different forms. Some vegetarians avoid meat but still eat dairy and eggs—these are called lacto-ovo vegetarians. Others, like vegans, avoid all animal-derived products, including honey and gelatin. There are also pescatarians, who exclude meat but still consume fish. Flexitarians mostly eat plant-based foods but occasionally include meat or fish. These variations show that a meatless diet can be adapted to individual needs and beliefs, making it a flexible and increasingly popular choice for people around the world.", "At the core of many vegetarian beliefs is the idea of respecting all forms of life. For some, avoiding meat is a moral decision rooted in the belief that animals have the right to live without suffering. This perspective emphasizes empathy, compassion, and non-violence. It is also reflected in certain spiritual or religious practices where harming living beings is discouraged. Choosing a meatless diet becomes more than just a personal choice—it represents a commitment to treating all creatures with dignity and care." ], headings: ["Possible to happen", "Our responsibilities for global", "Health gets better with diet", "Respect the life", "Farming Factory – it is a harmful thing", "Types of Vegetarian", "Various explanations"], answers: [4, 2, 6, 0, 1, 5, 3] } },
+        { id: 10, title: "Test 10: Music", part1: { text: "I am never {1}. In the mornings, I attend {2}. I eat lunch in the {3}. I buy food from the {4}. I always {5} dinner for myself.", options: [["late","soon","early"], ["meetings","dinner","breakfast"], ["park","city","village"], ["shop","window","car"], ["cook","drink","breathe"]], answers: ["late", "meetings", "park", "shop", "cook"] }, part2: { topic1: { title: "Jay Mist", sentences: ["It was a major action movie and he gained famous from that film.", "At one of these events, an actor agent saw him and gave him a starring role.", "They left their home country and took Jay to live in the United States.", "Jay was very good at that and he participated in a bodybuilding competition.", "He started study at the school in that country, and in his free time he did some strength. exercise"], order: [5, 4, 1, 3, 2] }, topic2: { title: "Potatoes", sentences: ["This colour means it is perfect for growing, you should put some earth in the pot and dig it deep down.", "An old potato will have little roots, will be a little green, and won't be good for eating.", "With this care, you should see a potato plant growing after couples of weeks.", "All you need is some earth, an old potato and a big spot.", "When you've done this, you should water it every day and place it in a sunny spot."], order: [3, 2, 5, 1, 4] } }, part3: { people: ["Ali","Carla","Deniz","Bruno"], texts: { Ali: "I like traveling to the beach. I think I have to walk quite a distance from the hotel to the beach so I think I have to bring boots. however, when I opened the suitcase I didn't see any boots. But I still completed the trip and visited many beautiful beaches. One great thing is that the beaches are in remote areas so there are very few tourists. However, it also makes finding food and drinks more difficult.", Bruno: "As an architect, I have always been interested in how buildings are constructed. So when I travel, I never spend time lying on the beach or buying souvenirs. I will go around the area to see the architecture of the houses. I chose to go around by taxi, it was great. However, it cost me a lot because I traveled alone and had no one to share the costs with. But for me this was still a great experience because I got to see many old houses", Carla: "The sharp bends of the island made me abandon the idea of ​​renting a car, because it was very dangerous. I decided to take the bus, it was also much cheaper. However, the bus routes are quite few and there are many time constraints. We toured the neighborhoods on foot. I loved this experience because I could see many beautiful sights.", Deniz: "There's a lot of food here and I spend most of my time eating. I can't recommend any of the dishes because they are all very impressive. If you want to cook for yourself, you will have to take the bus to the market. Don't forget to visit the street market because they sell a lot of cool local products. I have a lot of good bargains there." }, questions: ["Who loved eating food here?", "Who liked to walk?", "Who forgot to bring something?", "Who liked to be alone?", "Who liked buying things on the island?", "Who thought public transport could be improved?", "Who spent a lot of money on transport?"], answers: ["Deniz", "Carla", "Ali", "Ali", "Deniz", "Carla", "Bruno"] }, part4: { paragraphs: ["For many people, music is a deeply emotional experience. It offers a unique and personal way to express feelings that may be difficult to put into words. Composing melodies, writing lyrics, or simply playing with passion allows individuals to explore their emotional world and communicate it with others. Music can reflect joy, sadness, hope, or frustration. For this reason, it is often used in therapy to help people process emotions. In creative expression, music becomes both an emotional release and a form of personal storytelling.", "Many people report feeling happier and more balanced when music is part of their daily life. Playing or listening to music can reduce stress, improve mood, and create a sense of inner peace. It provides a break from daily routines and offers something meaningful to focus on. Some use music to relax before bed, while others rely on it to energize their mornings. The emotional and psychological benefits are powerful, making music a simple yet effective tool for personal well-being.", "Scientific studies have shown that learning to play music strengthens memory. When musicians play, they must recall notes, rhythms, and sequences, sometimes in real-time. Reading sheet music while coordinating hands or breath with timing challenges the brain, forming new neural pathways. This mental exercise has even been linked to improved academic performance in children and better memory retention in older adults. Whether memorizing entire pieces or remembering finger positions, the mental workout of music can benefit cognitive health across all age groups.", "Learning music requires dedication and routine. Students must practice regularly, attend rehearsals, and develop time management skills to balance music with other responsibilities. This structure helps build self-discipline and patience. Mastering an instrument takes months, even years, and involves repeating scales, fixing mistakes, and gradually improving. These habits transfer to other areas of life, helping musicians stay focused and committed to long-term goals. Music teaches that progress comes through consistency and effort over time.", "Musicians often develop a heightened awareness of other people’s emotional states. In group settings, they must listen carefully and respond to changes in tone, tempo, or mood. This sensitivity helps them stay in harmony with others, both musically and socially. Playing music with others encourages empathy and understanding. Over time, this experience fosters emotional intelligence—a skill that benefits communication, relationships, and social awareness in everyday life.", "While music is often associated with emotional expression, playing certain instruments can be surprisingly physical. Percussionists, drummers, and even pianists require strong coordination, stamina, and posture. Marching band musicians must walk in sync for long hours, often while carrying heavy instruments. String players need muscular endurance in their fingers and arms, and wind instrument players must have good lung capacity. Practicing regularly and performing under pressure also places physical demands on the body. In this way, music isn’t only mentally engaging—it can also be quite the workout.", "Music often brings people together, whether in choirs, orchestras, or bands. Being part of a musical group requires teamwork and offers regular opportunities to meet new people. This shared experience fosters a strong sense of community and belonging. For many, joining a music class or ensemble is not just about performance, but also about making friends and socializing in a relaxed, collaborative setting. Over time, these connections can turn into lasting friendships, broadening one's personal and professional network." ], headings: ["Develop a greater sense of well-being", "A great opportunity to broaden your social circle", "A physically demanding activity", "A way to learn discipline and the importance of routine", "Enhanced sensitivity to other people's feelings", "A good way to boost your memory", "A creative outlet for expressing emotions"], answers: [6, 0, 5, 3, 4, 2, 1] } }
+    ];
+
+    // --- APP STATE ---
+    const appState = {
+        scores: {}, status: {}, scaledScores: {}, cefr: {},
+        theme: localStorage.getItem('aptis_theme') || 'light',
+        user: { name: '', target: 'B2' }
+    };
+
+    // --- INIT ---
+    function init() {
+        applyTheme(appState.theme);
+        renderNav();
+        testsData.forEach(test => renderTest(test));
+        
+        // Check if user registered
+        const savedUser = localStorage.getItem('aptis_user');
+        if(savedUser) {
+            appState.user = JSON.parse(savedUser);
+            document.getElementById('welcome-overlay').style.display = 'none';
+            switchTab('dashboard');
+        }
+        
+        // Highlight Listener
+        document.addEventListener('mouseup', handleTextSelection);
+        document.addEventListener('touchend', handleTextSelection); // Basic mobile support
+    }
+
+    // --- WELCOME & USER LOGIC ---
+    function startApp() {
+        const name = document.getElementById('user-name').value.trim();
+        const target = document.getElementById('target-level').value;
+        
+        if(!name) { alert("Vui lòng nhập tên của bạn!"); return; }
+        
+        appState.user = { name, target };
+        localStorage.setItem('aptis_user', JSON.stringify(appState.user));
+        
+        const overlay = document.getElementById('welcome-overlay');
+        overlay.style.opacity = '0';
+        setTimeout(() => { overlay.style.display = 'none'; }, 500);
+        
+        switchTab('dashboard');
+    }
+
+    // --- THEME LOGIC ---
+    function toggleTheme() {
+        appState.theme = appState.theme === 'light' ? 'dark' : 'light';
+        localStorage.setItem('aptis_theme', appState.theme);
+        applyTheme(appState.theme);
+    }
+
+    function applyTheme(theme) {
+        if (theme === 'dark') document.body.classList.add('dark-mode');
+        else document.body.classList.remove('dark-mode');
+    }
+
+    // --- HIGHLIGHT LOGIC ---
+    function handleTextSelection(e) {
+        const toolbar = document.getElementById('highlighter-toolbar');
+        const selection = window.getSelection();
+        
+        if (selection.toString().length > 0 && !e.target.closest('#highlighter-toolbar')) {
+            if (e.target.closest('.reading-text') || e.target.closest('.gap-text') || e.target.closest('.paragraph-text')) {
+                const range = selection.getRangeAt(0);
+                const rect = range.getBoundingClientRect();
+                
+                // Better positioning logic for mobile/desktop
+                let top = window.scrollY + rect.top - 50;
+                let left = window.scrollX + rect.left + (rect.width / 2) - 100; // Center roughly
+                
+                // Boundary checks
+                if (top < 0) top = 10;
+                if (left < 0) left = 10;
+                
+                toolbar.style.display = 'block';
+                toolbar.style.top = `${top}px`;
+                toolbar.style.left = `${left}px`;
+            } else { toolbar.style.display = 'none'; }
+        } else if (!e.target.closest('#highlighter-toolbar')) { toolbar.style.display = 'none'; }
+    }
+
+    function applyHighlight(colorClass) {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+        const range = selection.getRangeAt(0);
+        if (colorClass === 'remove') { document.execCommand('removeFormat'); }
+        else {
+            const span = document.createElement('span');
+            span.className = colorClass;
+            try { range.surroundContents(span); } catch (e) { alert("Vui lòng chọn văn bản trong cùng một đoạn."); }
+        }
+        window.getSelection().removeAllRanges();
+        document.getElementById('highlighter-toolbar').style.display = 'none';
+    }
+
+    // --- RENDER NAV ---
+    function renderNav() {
+        const container = document.getElementById('test-nav-container');
+        container.innerHTML = '';
+
+        const dropdownBtn = document.createElement('button');
+        dropdownBtn.className = 'nav-btn dropdown-toggle';
+        dropdownBtn.innerHTML = `📚 Danh sách Bài tập <span id="nav-arrow">▼</span>`;
+        dropdownBtn.onclick = () => {
+            const content = document.getElementById('nav-list');
+            const arrow = document.getElementById('nav-arrow');
+            if(content.classList.contains('hidden')) {
+                content.classList.remove('hidden'); content.classList.add('show'); arrow.innerText = '▼';
+            } else {
+                content.classList.add('hidden'); content.classList.remove('show'); arrow.innerText = '▶';
+            }
+        };
+        container.appendChild(dropdownBtn);
+
+        const list = document.createElement('div');
+        list.id = 'nav-list';
+        list.className = 'dropdown-content';
+        
+        testsData.forEach(test => {
+            const btn = document.createElement('button');
+            btn.className = 'nav-btn sub-item';
+            btn.id = `nav-${test.id}`;
+            btn.onclick = () => switchTab(test.id);
+            btn.innerHTML = `${test.title} <span class="nav-score-badge" id="badge-${test.id}"></span>`;
+            list.appendChild(btn);
+        });
+        container.appendChild(list);
+    }
+
+    function switchTab(id) {
+        document.querySelectorAll('.container').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active-dashboard'));
+        document.querySelectorAll('.sub-item').forEach(el => el.classList.remove('active'));
+
+        if (id === 'dashboard') {
+            document.getElementById('dashboard').classList.add('active');
+            document.getElementById('btn-dashboard').classList.add('active-dashboard');
+            updateDashboard();
+        } else {
+            document.getElementById(`test-${id}`).classList.add('active');
+            document.getElementById(`nav-${id}`).classList.add('active');
+        }
+    }
+
+    function renderTest(data) {
+        const wrapper = document.getElementById('test-container-wrapper');
+        const div = document.createElement('div');
+        div.id = `test-${data.id}`;
+        div.className = 'container';
+
+        let html = `<h1>${data.title}</h1>`;
+
+        html += `<div class="section"><h3>Part 1: Sentence Completion</h3>`;
+        let p1Text = data.part1.text;
+        data.part1.options.forEach((opts, idx) => {
+            let select = `<select id="t${data.id}_p1_${idx}"><option value="">...</option>`;
+            opts.forEach(opt => select += `<option value="${opt}">${opt}</option>`);
+            select += `</select>`;
+            p1Text = p1Text.replace(`{${idx+1}}`, select);
+        });
+        html += `<div class="gap-text">${p1Text}</div></div>`;
+
+        html += `<div class="section"><h3>Part 2: Paragraph Ordering (1-5)</h3>`;
+        const renderTopic = (topic, tIdx) => {
+            let h = `<h4 style="margin-top:20px; color:var(--text-muted);">Topic: ${topic.title}</h4>`;
+            topic.sentences.forEach((sent, sIdx) => {
+                h += `<div class="order-item">
+                        <select class="order-select" id="t${data.id}_p2_${tIdx}_${sIdx}">
+                            <option value="0">-</option>
+                            <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
+                        </select>
+                        <div style="flex:1">${sent}</div>
+                        <span class="ans-key" id="ans_t${data.id}_p2_${tIdx}_${sIdx}" style="display:none; color:var(--danger); margin-left:10px; font-weight:bold;">Correct: ${topic.order[sIdx]}</span>
+                      </div>`;
+            });
+            return h;
+        };
+        html += renderTopic(data.part2.topic1, 1);
+        html += renderTopic(data.part2.topic2, 2);
+        html += `</div>`;
+
+        html += `<div class="section"><h3>Part 3: Opinion Matching</h3>`;
+        html += `<div class="reading-text">`;
+        Object.entries(data.part3.texts).forEach(([k, v]) => {
+            html += `<div class="person-block"><span class="person-label">Person ${k}:</span> <span id="t${data.id}_p3_text_${k}">${v}</span></div>`;
+        });
+        html += `</div>`;
+        
+        data.part3.questions.forEach((q, idx) => {
+            html += `<div class="question-row" id="t${data.id}_p3_row_${idx}">
+                        <span style="flex:1; font-weight:500;">${idx+1}. ${q}</span>
+                        <div class="radio-options">`;
+            data.part3.people.forEach(p => { html += `<label><input type="radio" name="t${data.id}_p3_${idx}" value="${p}"> ${p}</label>`; });
+            html += `</div></div>`;
+        });
+        html += `</div>`;
+
+        html += `<div class="section"><h3>Part 4: Matching Headings</h3>`;
+        data.part4.paragraphs.forEach((para, idx) => {
+            html += `<div class="heading-match">
+                        <div class="paragraph-box" id="t${data.id}_p4_box_${idx}">
+                            <select style="width:100%; font-weight:bold; padding:8px; margin-bottom:10px;" id="t${data.id}_p4_${idx}"><option value="">-- Choose Heading --</option>`;
+            data.part4.headings.forEach((head, hIdx) => { html += `<option value="${hIdx}">${head}</option>`; });
+            html += `</select><div class="paragraph-text">${para}</div></div></div>`;
+        });
+        html += `</div>`;
+
+        html += `<div style="text-align:center; margin-top:30px;"><button class="btn" onclick="submitTest(${data.id})">Nộp bài (Submit)</button></div><div id="result-${data.id}" class="result-box"></div>`;
+
+        div.innerHTML = html;
+        wrapper.appendChild(div);
+    }
+
+    function toggleScoreDetails(header) {
+        const container = document.getElementById('score-details-wrapper');
+        container.classList.toggle('hidden');
+        header.classList.toggle('collapsed');
+    }
+
+    function submitTest(id) {
+        const test = testsData.find(t => t.id === id);
+        if (!test) return;
+
+        let rawScore = 0;
+        let totalItems = 0;
+
+        test.part1.answers.forEach((ans, idx) => { totalItems++; const el = document.getElementById(`t${id}_p1_${idx}`); if(el.value === ans) { rawScore++; el.classList.add('correct'); } else el.classList.add('incorrect'); });
+
+        const checkPart2 = (topic, tIdx) => {
+            topic.order.forEach((ans, sIdx) => { totalItems++; const el = document.getElementById(`t${id}_p2_${tIdx}_${sIdx}`); if(parseInt(el.value) === ans) { rawScore++; el.classList.add('correct'); } else { el.classList.add('incorrect'); document.getElementById(`ans_t${id}_p2_${tIdx}_${sIdx}`).style.display='inline'; } });
+        };
+        checkPart2(test.part2.topic1, 1); checkPart2(test.part2.topic2, 2);
+
+        test.part3.answers.forEach((ans, idx) => { totalItems++; const radios = document.getElementsByName(`t${id}_p3_${idx}`); let userVal = null; radios.forEach(r => { if(r.checked) userVal = r.value; }); const row = document.getElementById(`t${id}_p3_row_${idx}`); if(userVal === ans) { rawScore++; row.classList.add('correct'); } else row.classList.add('incorrect'); });
+
+        test.part4.answers.forEach((ans, idx) => { totalItems++; const el = document.getElementById(`t${id}_p4_${idx}`); const box = document.getElementById(`t${id}_p4_box_${idx}`); if(parseInt(el.value) === ans) { rawScore++; box.classList.add('correct'); } else box.classList.add('incorrect'); });
+
+        const scaledScore = Math.round((rawScore / totalItems) * 50);
+        let cefr = 'A0';
+        if (scaledScore >= 43) cefr = 'C'; else if (scaledScore >= 37) cefr = 'B2'; else if (scaledScore >= 31) cefr = 'B1'; else if (scaledScore >= 20) cefr = 'A2'; else if (scaledScore >= 10) cefr = 'A1';
+
+        appState.scores[id] = rawScore; appState.scaledScores[id] = scaledScore; appState.cefr[id] = cefr; appState.status[id] = 'completed';
+
+        const container = document.getElementById(`test-${id}`);
+        container.querySelectorAll('input, select, button.btn').forEach(el => el.disabled = true);
+        
+        const resBox = document.getElementById(`result-${id}`);
+        resBox.innerHTML = `<h2>Kết quả: ${cefr}</h2><div style="display:flex; justify-content:center; gap:40px; margin:20px 0;"><div><strong>Điểm Thô:</strong> ${rawScore}/${totalItems}</div><div><strong>Scaled Score:</strong> ${scaledScore}/50</div></div>`;
+        resBox.style.display = 'block';
+
+        const badge = document.getElementById(`badge-${id}`);
+        badge.innerText = cefr; badge.className = `nav-score-badge badge-${cefr}`;
+        document.getElementById(`nav-${id}`).classList.add('completed');
+
+        updateDashboard();
+    }
+
+    function updateDashboard() {
+        const tbody = document.getElementById('score-table-body');
+        tbody.innerHTML = '';
+        
+        let totalScaled = 0;
+        let count = 0;
+
+        testsData.forEach(test => {
+            const status = appState.status[test.id] || 'pending';
+            const raw = appState.scores[test.id] !== undefined ? appState.scores[test.id] : '-';
+            const scaled = appState.scaledScores[test.id] !== undefined ? appState.scaledScores[test.id] : '-';
+            const level = appState.cefr[test.id] || '-';
+            if (status === 'completed') { totalScaled += appState.scaledScores[test.id]; count++; }
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td style="font-weight:500">${test.title}</td><td>${raw}</td><td>${scaled}</td><td><span class="${level !== '-' ? 'badge-'+level : ''} nav-score-badge" style="display:inline-block;">${level}</span></td><td>${status === 'completed' ? '<span style="color:var(--success); font-weight:bold;">✓ Hoàn thành</span>' : '<span style="color:var(--text-muted);">○ Chưa làm</span>'}</td>`;
+            tbody.appendChild(tr);
+        });
+
+        const avgScaled = count > 0 ? Math.round(totalScaled / count) : 0;
+        let avgCefr = '-';
+        if (count > 0) {
+            if (avgScaled >= 43) avgCefr = 'C'; else if (avgScaled >= 37) avgCefr = 'B2'; else if (avgScaled >= 31) avgCefr = 'B1'; else if (avgScaled >= 20) avgCefr = 'A2'; else if (avgScaled >= 10) avgCefr = 'A1'; else avgCefr = 'A0';
+        }
+
+        document.getElementById('avg-scaled').innerText = avgScaled;
+        const cefrEl = document.getElementById('avg-cefr');
+        cefrEl.innerText = avgCefr;
+        
+        if(count > 0) {
+            cefrEl.className = `stat-val badge-${avgCefr}`; cefrEl.style.padding = '5px 20px'; cefrEl.style.borderRadius = '8px'; cefrEl.style.fontSize = '2rem'; cefrEl.style.color = '#fff';
+        } else {
+            cefrEl.className = 'stat-val'; cefrEl.style.color = 'var(--secondary)'; cefrEl.style.background = 'none';
+        }
+        
+        document.getElementById('tests-completed').innerText = `${count}/10`;
+
+        // --- PERSONAL FEEDBACK LOGIC ---
+        const fbCard = document.getElementById('personal-feedback');
+        const fbIcon = document.getElementById('fb-icon');
+        const fbTitle = document.getElementById('fb-title');
+        const fbMsg = document.getElementById('fb-msg');
+        
+        if (count > 0) {
+            fbCard.style.display = 'flex';
+            const cefrMap = { 'A0':0, 'A1':1, 'A2':2, 'B1':3, 'B2':4, 'C':5 };
+            const currentVal = cefrMap[avgCefr] || 0;
+            const targetVal = cefrMap[appState.user.target] || 3; // Default B1
+
+            if (currentVal >= targetVal) {
+                fbCard.className = 'stat-card feedback-card feedback-success';
+                fbIcon.innerText = '🏆';
+                fbTitle.innerText = `Chúc mừng ${appState.user.name}!`;
+                fbMsg.innerText = `Tuyệt vời! Bạn đã đạt chuẩn đầu ra ${appState.user.target} mong muốn. Hãy duy trì phong độ nhé!`;
+            } else {
+                fbCard.className = 'stat-card feedback-card feedback-warning';
+                fbIcon.innerText = '💪';
+                fbTitle.innerText = `Cố lên ${appState.user.name}!`;
+                fbMsg.innerText = `Bạn đang ở mức ${avgCefr}. Hãy luyện tập thêm một chút nữa để đạt mục tiêu ${appState.user.target} nhé.`;
+            }
+        } else {
+            fbCard.style.display = 'none';
+        }
+    }
+
+    init();
+
+</script>
+</body>
+</html>
