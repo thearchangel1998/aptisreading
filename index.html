@@ -484,6 +484,33 @@
             <p><em>Hãy xem lại các câu sai (màu đỏ) phía trên để rút kinh nghiệm.</em></p>
         `;
         res.scrollIntoView({behavior:'smooth'});
+    // --- Tìm đoạn cuối hàm submitTest(id) ---
+function submitTest(id) {
+    // ... (Giữ nguyên phần tính toán raw, total, scaled, cefr, timeString cũ) ...
+
+    // THÊM ĐOẠN NÀY VÀO CUỐI HÀM:
+    const payload = {
+        userName: appState.user.name,
+        testTitle: test.title,
+        score: `${raw}/${total} (${scaled}/50)`,
+        cefr: cefr,
+        timeUsed: timeString
+    };
+
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbwM1X1uPq_B1_pUG7XQyttVqoSpOCqcnDxceCJnixdTcHsZlH2V4nie5PKzfWjvKFY/exec";
+
+    fetch(webAppUrl, {
+        method: 'POST',
+        mode: 'no-cors', // Rất quan trọng để tránh lỗi bảo mật (CORS)
+        cache: 'no-cache',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(() => console.log("Data sent to Sheet successfully!"))
+    .catch(err => console.error("Error sending data:", err));
+
+    // ... (Giữ nguyên phần hiển thị result-panel cũ) ...
+}
     }
 
     // Highlighter Logic (Same as v2.3)
