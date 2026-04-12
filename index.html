@@ -238,21 +238,18 @@
     // --- APP STATE & STORAGE ---
     const appState = {
         user: { name: 'Học viên', target: 'B2', theme: 'light' },
-        results: {} // { testId: { raw: 10, total: 20, cefr: 'B1' } }
+        results: {} 
     };
     let timerInterval, timeLeft = 1800;
 
     function init() {
         loadData();
         renderNav();
-        
-        // Listeners
         document.addEventListener('mouseup', handleSelection);
         document.addEventListener('touchend', handleSelection);
     }
 
     function loadData() {
-        // Load User
         const storedUser = localStorage.getItem('aptis_user_profile_v2');
         if (storedUser) {
             appState.user = JSON.parse(storedUser);
@@ -261,8 +258,6 @@
         } else {
             document.getElementById('welcome-overlay').style.display = 'flex';
         }
-        
-        // Load Results
         const storedRes = localStorage.getItem('aptis_results_v2');
         if (storedRes) {
             appState.results = JSON.parse(storedRes);
@@ -285,22 +280,17 @@
 
     function updateDashboardInfo() {
         document.getElementById('user-welcome-banner').innerHTML = `<h3>Xin chào, ${appState.user.name}!</h3><div>Mục tiêu hiện tại: <strong>Level ${appState.user.target}</strong></div>`;
-        
-        // Update stats
         const doneCount = Object.keys(appState.results).length;
         document.getElementById('stat-completed').innerText = `${doneCount}/10`;
-        
         let totalScaled = 0;
         Object.values(appState.results).forEach(r => totalScaled += r.scaled);
         const avg = doneCount > 0 ? Math.round(totalScaled / doneCount) : 0;
-        
         let avgCefr = 'A0';
         if (avg >= 43) avgCefr = 'C';
         else if (avg >= 37) avgCefr = 'B2';
         else if (avg >= 31) avgCefr = 'B1';
         else if (avg >= 20) avgCefr = 'A2';
         else if (avg >= 10) avgCefr = 'A1';
-        
         document.getElementById('stat-avg').innerText = doneCount > 0 ? `${avg}/50 (${avgCefr})` : '--';
     }
 
@@ -312,33 +302,25 @@
         }
     }
 
-    // --- NAVIGATION ---
     function renderNav() {
         const navList = document.getElementById('nav-list');
-        navList.innerHTML = ''; // Clear
-        
+        navList.innerHTML = '';
         const dashBtn = document.createElement('div');
         dashBtn.className = 'nav-item active'; dashBtn.innerHTML = '📊 Dashboard';
         dashBtn.onclick = () => switchTest('dashboard', dashBtn);
         navList.appendChild(dashBtn);
-
         testsData.forEach(test => {
             const btn = document.createElement('div');
             btn.className = 'nav-item';
-            
-            // Check saved result
             let badge = '';
             const res = appState.results[test.id];
             if (res) {
                 btn.classList.add('completed');
                 badge = `<span class="nav-score">${res.cefr}</span>`;
             }
-            
             btn.innerHTML = `${test.title} ${badge}`;
             btn.onclick = () => switchTest(test.id, btn);
             navList.appendChild(btn);
-
-            // Pre-render container only if not exists
             if (!document.getElementById(`test-${test.id}`)) {
                 const div = document.createElement('div');
                 div.id = `test-${test.id}`;
@@ -351,8 +333,6 @@
 
     function renderTestHTML(data) {
         let html = `<h2>${data.title}</h2>`;
-        
-        // Part 1
         html += `<div class="part-section"><div class="part-title">Part 1: Sentence Completion</div><div class="gap-text">`;
         let p1 = data.part1.text;
         data.part1.options.forEach((opt, i) => {
@@ -362,9 +342,6 @@
             p1 = p1.replace(`{${i+1}}`, sel);
         });
         html += `${p1}</div></div>`;
-
-        // Part 2
-        html += `<div class="part-section"><div class="part-title">Part 2: Text Organization</div>`;
         const renderTopic = (topic, tid) => {
             let h = `<div style="margin-bottom:20px;"><strong>Topic: ${topic.title}</strong>`;
             topic.sentences.forEach((sent, i) => {
@@ -372,8 +349,6 @@
             }); return h + `</div>`;
         };
         html += renderTopic(data.part2.topic1, 1) + renderTopic(data.part2.topic2, 2) + `</div>`;
-
-        // Part 3
         html += `<div class="part-section"><div class="part-title">Part 3: Opinion Matching</div><div class="reading-text">`;
         Object.entries(data.part3.texts).forEach(([name, txt]) => html += `<p><strong>${name}:</strong> ${txt}</p>`);
         html += `</div>`;
@@ -383,8 +358,6 @@
             html += `<div class="question-row" id="t${data.id}_p3_row_${i}"><span>${i+1}. ${q}</span><div class="radio-group">${opts}</div><div id="ans_t${data.id}_p3_${i}" class="ans-reveal" style="display:none"></div></div>`;
         });
         html += `</div>`;
-
-        // Part 4
         html += `<div class="part-section"><div class="part-title">Part 4: Matching Headings</div>`;
         data.part4.paragraphs.forEach((para, i) => {
             let opts = `<select id="t${data.id}_p4_${i}" style="width:100%; margin-bottom:10px; font-weight:bold;"><option value="">-- Choose Heading --</option>`;
@@ -400,7 +373,6 @@
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         btn.classList.add('active');
         document.querySelectorAll('.test-container').forEach(el => el.classList.remove('active'));
-        
         if (id === 'dashboard') {
             document.getElementById('dashboard').classList.add('active');
             stopTimer();
@@ -409,9 +381,6 @@
         } else {
             document.getElementById(`test-${id}`).classList.add('active');
             document.getElementById('current-test-name').innerText = testsData.find(t => t.id === id).title;
-            
-            // Nếu đã làm rồi thì hiện kết quả cũ (optional) - Hiện tại ta cho làm lại
-            // Nhưng nếu muốn xem lại kết quả cũ, ta có thể check appState.results[id]
             startTimer();
         }
     }
@@ -430,7 +399,7 @@
     }
 
     function submitTest(id) {
-        clearInterval(timerInterval); // Stop timer
+        clearInterval(timerInterval); 
         const timeUsedSeconds = 1800 - timeLeft;
         const minutes = Math.floor(timeUsedSeconds / 60);
         const seconds = timeUsedSeconds % 60;
@@ -439,7 +408,7 @@
         const test = testsData.find(t => t.id === id);
         let raw = 0, total = 0;
 
-        // Scoring Logic (Same as v2.3)
+        // Scoring Logic
         test.part1.answers.forEach((ans, i) => { 
             total++; const el = document.getElementById(`t${id}_p1_${i}`); 
             if(el.nextElementSibling && el.nextElementSibling.classList.contains('ans-reveal')) el.nextElementSibling.remove();
@@ -468,10 +437,9 @@
         const scaled = Math.round((raw / total) * 50);
         let cefr = scaled >= 43 ? 'C' : scaled >= 37 ? 'B2' : scaled >= 31 ? 'B1' : scaled >= 20 ? 'A2' : scaled >= 10 ? 'A1' : 'A0';
         
-        // SAVE RESULT
         appState.results[id] = { raw, total, scaled, cefr, time: timeString, date: new Date().toISOString() };
         saveData();
-        renderNav(); // Update badges
+        renderNav(); 
 
         const res = document.getElementById(`res-${id}`);
         res.style.display = 'block';
@@ -484,36 +452,24 @@
             <p><em>Hãy xem lại các câu sai (màu đỏ) phía trên để rút kinh nghiệm.</em></p>
         `;
         res.scrollIntoView({behavior:'smooth'});
-    // --- Tìm đoạn cuối hàm submitTest(id) ---
-function submitTest(id) {
-    // ... (Giữ nguyên phần tính toán raw, total, scaled, cefr, timeString cũ) ...
 
-    // THÊM ĐOẠN NÀY VÀO CUỐI HÀM:
-    const payload = {
-        userName: appState.user.name,
-        testTitle: test.title,
-        score: `${raw}/${total} (${scaled}/50)`,
-        cefr: cefr,
-        timeUsed: timeString
-    };
-
-    const webAppUrl = "https://script.google.com/macros/s/AKfycbwM1X1uPq_B1_pUG7XQyttVqoSpOCqcnDxceCJnixdTcHsZlH2V4nie5PKzfWjvKFY/exec";
-
-    fetch(webAppUrl, {
-        method: 'POST',
-        mode: 'no-cors', // Rất quan trọng để tránh lỗi bảo mật (CORS)
-        cache: 'no-cache',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    })
-    .then(() => console.log("Data sent to Sheet successfully!"))
-    .catch(err => console.error("Error sending data:", err));
-
-    // ... (Giữ nguyên phần hiển thị result-panel cũ) ...
-}
+        // FETCH TO GOOGLE APPS SCRIPT
+        const payload = {
+            userName: appState.user.name,
+            testTitle: test.title,
+            score: `${raw}/${total} (${scaled}/50)`,
+            cefr: cefr,
+            timeUsed: timeString
+        };
+        const webAppUrl = "https://script.google.com/macros/s/AKfycbwM1X1uPq_B1_pUG7XQyttVqoSpOCqcnDxceCJnixdTcHsZlH2V4nie5PKzfWjvKFY/exec";
+        fetch(webAppUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            cache: 'no-cache',
+            body: JSON.stringify(payload)
+        }).then(() => console.log("Gửi thành công!")).catch(err => console.error("Lỗi:", err));
     }
 
-    // Highlighter Logic (Same as v2.3)
     let currentRange = null;
     function handleSelection(e) {
         if (e.target.closest('#hl-toolbar')) return;
@@ -544,7 +500,6 @@ function submitTest(id) {
         appState.user.theme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
         saveData();
     }
-
     init();
 </script>
 </body>
